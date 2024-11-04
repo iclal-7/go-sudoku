@@ -2,12 +2,28 @@ package main
 
 import (
 	"fmt"
+	"os"
 )
 
 // sudoku tahtasının boyutu
 const N = 9
 
-func printBoard(board [N][N]int) {
+func parseBoard(args []string) [][]int {
+	board := make([][]int, N)
+	for i := range board {
+		board[i] = make([]int, N)
+		for j, char := range args[i] {
+			if char == '.' {
+				board[i][j] = 0
+			} else {
+				board[i][j] = int(char - '0')
+			}
+		}
+	}
+	return board
+}
+
+func printBoard(board [][]int) {
 	for i := 0; i < N; i++ { // satırları ve her satırdaki sürunları dolaşır
 		for j := 0; j < N; j++ {
 			fmt.Print(board[i][j], " ") // hücreler arası boşluk bırakır
@@ -16,7 +32,7 @@ func printBoard(board [N][N]int) {
 	}
 }
 
-func solveSudoku(board *[N][N]int) bool {
+func solveSudoku(board [][]int) bool {
 	for row := 0; row < N; row++ {
 		for col := 0; col < N; col++ {
 			if board[row][col] == 0 {
@@ -36,7 +52,7 @@ func solveSudoku(board *[N][N]int) bool {
 	return true // tüm hücreler doluysa çözüm bulunmuştur
 }
 
-func isSafe(board *[N][N]int, row, col, num int) bool {
+func isSafe(board [][]int, row, col, num int) bool {
 	for x := 0; x < N; x++ {
 		if board[row][x] == num { // aynı satırdaki tüm hücreler dolaşılır
 			return false // num zaten bu satırda varsa false döner
@@ -62,24 +78,14 @@ func isSafe(board *[N][N]int, row, col, num int) bool {
 }
 
 func main() {
-	board := [N][N]int{
-		{5, 1, 6, 0, 0, 0, 0, 4, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 1},
-		{0, 0, 3, 0, 0, 0, 7, 0, 0},
-		{0, 0, 0, 7, 0, 0, 1, 0, 0},
-		{0, 4, 0, 0, 5, 0, 0, 3, 0},
-		{0, 0, 0, 0, 0, 6, 0, 0, 0},
-		{0, 0, 1, 0, 0, 0, 4, 0, 0},
-		{2, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 3, 0, 0, 0, 0, 0, 1, 5},
+	if len(os.Args) != 10 {
+		fmt.Println("Error")
+		return
 	}
-	fmt.Println("Başlangıç Sudoku tahtası:") // başlangıç tahtası yazılır
-	printBoard(board)
-
-	if solveSudoku(&board) {
-		fmt.Println("\nÇözülen Sudoku tahtası:") //çözülen tahtayı yazdır
-		printBoard(board)                        // çözülen tahtayı yazdırmak için
+	board := parseBoard(os.Args[1:])
+	if solveSudoku(board) {
+		printBoard(board) // çözülen tahtayı yazdırmak için
 	} else {
-		fmt.Println("\nSudoku çözülemedi.") // çözüm bulunamazsa
+		fmt.Println("\nError") // çözüm bulunamazsa
 	}
 }
